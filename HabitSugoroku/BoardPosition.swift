@@ -15,7 +15,7 @@ enum BoardState: Equatable{
     case complete
 }
 
-enum RateOfDay:Int{
+enum RateOfDay:Int,Codable{
     case good=2
     case normal=1
     case bad=0
@@ -88,7 +88,7 @@ struct JourneyPlan{
     }
 }
 
-struct Record{
+struct Record:Codable,Equatable{
     let dateYMD:YearMonthDay
     let rateOfDay:RateOfDay
     

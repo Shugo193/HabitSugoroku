@@ -199,6 +199,20 @@ struct HabitSugorokuTests {
 
             #expect(morningRecord.dateYMD != eveningRecord.dateYMD)
         }
+        @Test("記録を保存して読み戻すと同じ記録になる")
+        func recordisCodable()throws{
+            let YMD = try createYMD(year: 2026, month: 11, day: 22, timeZone: tokyoTimeZone)
+            let rate = RateOfDay.bad
+            let record = Record(dateYMD: YMD, rateOfDay: rate)
+            
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(record)
+            
+            let decoder = JSONDecoder()
+            let decodedRecord = try decoder.decode(Record.self,from:data)
+            
+            #expect(record == decodedRecord)
+        }
     }
     
     struct YearMonthDayTest{
@@ -228,5 +242,7 @@ struct HabitSugorokuTests {
             
         
         }
+        
+        
     }
 }
