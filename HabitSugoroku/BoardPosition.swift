@@ -1,5 +1,5 @@
 //
-//  CalculateDay.swift
+//  BoardPosition.swift
 //  HabitSugoroku
 //
 //  Created by asaishugo on 2026/11/20.
@@ -7,49 +7,128 @@
 
 import Foundation
 
-let BOADSPACES = 20
+let BOARDSPACES = 20
 
-enum BoardState{
+enum BoardState: Equatable{
     case setup
     case traveling(sheets:Int,spaces:Int)
     case complete
-    
 }
 
-enum RecordType{
-    enum RateDay{
-        case good
-        case normal
-        case bad
+enum RateOfDay:Int{
+    case good=2
+    case normal=1
+    case bad=0
+}
+
+enum CreateJourneyError:Error{
+    case invalidDays
+    case alreadyEnded
+}
+enum calendarError:Error{
+    case invalidDate
+}
+
+func createUtcCalendar()-> Calendar{
+    var calendar = Calendar(identifier: .gregorian)
+    if let timezone = TimeZone(identifier: "UTC"){
+        calendar.timeZone = timezone
+    }
+    
+    return calendar
+}
+
+struct YearMonthDay:Comparable,Hashable,Codable{
+    let year:Int
+    let month:Int
+    let day:Int
+    
+    init(date:Date,timeZone:TimeZone){
+        
+        var inputCalendar = Calendar(identifier: .gregorian)
+        inputCalendar.timeZone = timeZone
+
+        self.year = inputCalendar.component(.year, from: date)
+        self.month = inputCalendar.component(.month, from: date)
+        self.day = inputCalendar.component(.day, from: date)
+    }
+    
+    static func < (lhs:YearMonthDay, rhs:YearMonthDay)->Bool{
+        if lhs.year != rhs.year{
+            return lhs.year < rhs.year
+        }
+        if lhs.month != rhs.month{
+            return lhs.month < rhs.month
+        }
+        return lhs.day < rhs.day
     }
 }
 
-func daypassed(startDate:Date,todayDate:Date,calender:Calendar)-> Int{
-    let startDay = calender.startOfDay(for: startDate)
-    let todayDay = calender.startOfDay(for: todayDate)
+
+
+struct JourneyPlan{
+    let startYMD:YearMonthDay
+    let periodDays:Int
     
-    let days = calender.dateComponents(
+    init(startYMD:YearMonthDay, periodDays:Int, todayYMD:YearMonthDay) throws {
+        
+        if !(1...100).contains(periodDays){
+            throw CreateJourneyError.invalidDays
+        }
+        let passedDays = try dayPassed(startYMD: startYMD, todayYMD: todayYMD)
+        
+        let state = boardPosition(periodDays: periodDays, passedDays: passedDays)
+        if state == .complete{
+            throw CreateJourneyError.alreadyEnded
+        }
+        
+        self.startYMD = startYMD
+        self.periodDays = periodDays
+        
+    }
+}
+
+struct Record{
+    let dateYMD:YearMonthDay
+    let rateOfDay:RateOfDay
+    
+    init(dateYMD:YearMonthDay,rateOfDay:RateOfDay){
+        self.dateYMD = dateYMD
+        self.rateOfDay = rateOfDay
+    }
+}
+
+func dayPassed(startYMD:YearMonthDay,todayYMD:YearMonthDay)throws-> Int{
+    let utcCalendar = createUtcCalendar()
+    
+    let startComponents = DateComponents(year: startYMD.year,month: startYMD.month, day: startYMD.day)
+    let todayComponents = DateComponents(year: todayYMD.year,month: todayYMD.month, day: todayYMD.day)
+    
+    guard let startDate = (utcCalendar.date(from: startComponents)) else{throw calendarError.invalidDate}
+    guard let todayDate = (utcCalendar.date(from: todayComponents)) else{throw calendarError.invalidDate}
+    
+    guard let days = (utcCalendar.dateComponents(
         [.day],
-        from:startDay,
-        to:todayDay
-    ).day ?? -1
+        from:startDate,
+        to:todayDate
+    ).day) else{throw calendarError.invalidDate}
     
     return days
 }
 
-func boardPosition(totalDays:Int, passedDays:Int)-> BoardState{
+func boardPosition(periodDays:Int, passedDays:Int)-> BoardState{
     if(passedDays < 0){
         return .setup
     }
     else{
-        if((totalDays-passedDays)<0){
+        if(passedDays  >= periodDays){
             return .complete
         }
         else{
-            let seets = passedDays / BOADSPACES
-            let spaces = passedDays % BOADSPACES
+            let sheets = passedDays / BOARDSPACES
+            let spaces = passedDays % BOARDSPACES
             
-            return .traveling(sheets: seets, spaces: spaces)
+            return .traveling(sheets: sheets, spaces: spaces)
         }
     }
     
