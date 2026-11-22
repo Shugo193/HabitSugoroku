@@ -7,29 +7,29 @@
 
 import Foundation
 
-let BOARDSPACES = 20
+nonisolated let BOARDSPACES = 20
 
-enum BoardState: Equatable{
+nonisolated enum BoardState: Equatable{
     case setup
     case traveling(sheets:Int,spaces:Int)
     case complete
 }
 
-enum RateOfDay:Int,Codable{
+nonisolated enum RateOfDay:Int,Codable{
     case good=2
     case normal=1
     case bad=0
 }
 
-enum CreateJourneyError:Error{
+nonisolated enum CreateJourneyError:Error{
     case invalidDays
     case alreadyEnded
 }
-enum calendarError:Error{
+nonisolated enum calendarError:Error{
     case invalidDate
 }
 
-func createUtcCalendar()-> Calendar{
+nonisolated func createUtcCalendar()-> Calendar{
     var calendar = Calendar(identifier: .gregorian)
     if let timezone = TimeZone(identifier: "UTC"){
         calendar.timeZone = timezone
@@ -38,7 +38,7 @@ func createUtcCalendar()-> Calendar{
     return calendar
 }
 
-struct YearMonthDay:Comparable,Hashable,Codable{
+nonisolated struct YearMonthDay:Comparable,Hashable,Codable{
     let year:Int
     let month:Int
     let day:Int
@@ -47,7 +47,7 @@ struct YearMonthDay:Comparable,Hashable,Codable{
         
         var inputCalendar = Calendar(identifier: .gregorian)
         inputCalendar.timeZone = timeZone
-
+        
         self.year = inputCalendar.component(.year, from: date)
         self.month = inputCalendar.component(.month, from: date)
         self.day = inputCalendar.component(.day, from: date)
@@ -66,7 +66,7 @@ struct YearMonthDay:Comparable,Hashable,Codable{
 
 
 
-struct JourneyPlan{
+nonisolated struct JourneyPlan{
     let startYMD:YearMonthDay
     let periodDays:Int
     
@@ -88,7 +88,7 @@ struct JourneyPlan{
     }
 }
 
-struct Record:Codable,Equatable{
+nonisolated struct Record:Codable,Equatable{
     let dateYMD:YearMonthDay
     let rateOfDay:RateOfDay
     
@@ -98,7 +98,7 @@ struct Record:Codable,Equatable{
     }
 }
 
-func dayPassed(startYMD:YearMonthDay,todayYMD:YearMonthDay)throws-> Int{
+nonisolated func dayPassed(startYMD:YearMonthDay,todayYMD:YearMonthDay)throws-> Int{
     let utcCalendar = createUtcCalendar()
     
     let startComponents = DateComponents(year: startYMD.year,month: startYMD.month, day: startYMD.day)
@@ -116,7 +116,7 @@ func dayPassed(startYMD:YearMonthDay,todayYMD:YearMonthDay)throws-> Int{
     return days
 }
 
-func boardPosition(periodDays:Int, passedDays:Int)-> BoardState{
+nonisolated func boardPosition(periodDays:Int, passedDays:Int)-> BoardState{
     if(passedDays < 0){
         return .setup
     }

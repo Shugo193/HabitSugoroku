@@ -9,6 +9,7 @@ import Testing
 import Foundation
 @testable import HabitSugoroku
 
+
 let tokyoTimeZone = TimeZone(identifier: "Asia/Tokyo")!
 
 func createCalendar(timeZone:TimeZone)-> Calendar{
@@ -20,7 +21,7 @@ func createCalendar(timeZone:TimeZone)-> Calendar{
 
 
 func createYMD(year:Int, month:Int, day:Int,timeZone:TimeZone)throws->YearMonthDay{
-   let calendar = createCalendar(timeZone: timeZone)
+    let calendar = createCalendar(timeZone: timeZone)
     
     let dateComponents = DateComponents(year: year,month: month, day: day)
     let date = try #require(calendar.date(from: dateComponents))
@@ -29,6 +30,7 @@ func createYMD(year:Int, month:Int, day:Int,timeZone:TimeZone)throws->YearMonthD
     return YMD
     
 }
+
 struct HabitSugorokuTests {
     
     
@@ -109,7 +111,7 @@ struct HabitSugorokuTests {
     struct JourneyPlanTests{
         @Test("旅の日数は1-100日の間でそれ以外はエラーが返る")
         func initInvalidDaysThrows()throws{
-
+            
             let todayYMD = try (createYMD(year: 2026, month: 11, day: 21, timeZone: tokyoTimeZone))
             
             #expect(throws: CreateJourneyError.invalidDays){
@@ -139,7 +141,7 @@ struct HabitSugorokuTests {
             let todayDate = try #require(calendar.date(from: todayComponents))
             let pastDate = try #require(calendar.date(from: pastComponents))
             let tomorrowDate = try #require(calendar.date(from: tomorrowComponents))
-                    
+            
             
             let todayYMD = YearMonthDay(date: todayDate, timeZone: tokyoTimeZone)
             let pastYMD = YearMonthDay(date: pastDate, timeZone: tokyoTimeZone)
@@ -196,7 +198,7 @@ struct HabitSugorokuTests {
             let yesterdayYMD = YearMonthDay(date: yesterdayDate, timeZone: tokyoTimeZone)
             let morningRecord = Record(dateYMD: todayYMD, rateOfDay: .bad)
             let eveningRecord = Record(dateYMD: yesterdayYMD, rateOfDay: .bad)
-
+            
             #expect(morningRecord.dateYMD != eveningRecord.dateYMD)
         }
         @Test("記録を保存して読み戻すと同じ記録になる")
@@ -240,7 +242,7 @@ struct HabitSugorokuTests {
             #expect(newyorkYMD.month == 11)
             #expect(newyorkYMD.day == 21)
             
-        
+            
         }
         
         
